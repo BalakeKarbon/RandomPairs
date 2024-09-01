@@ -14,7 +14,7 @@ class RandomPairs {
 		while (pairedNames.length < names.length) {
 			randomName = names[rand.nextInt(names.length)];
 			for(String name: pairedNames) {
-				if(name == randomName) {
+				if(name.equals(randomName)) {
 					randomName="";
 					break;
 				}
@@ -63,7 +63,7 @@ class RandomPairs {
 				}
 			}
 			reader.close();
-			if(names[names.length-1]=="") {
+			if(names[names.length-1].equals("")) {
 				String newNames[] = new String[names.length-1];
 				for(int i = 0;i<(names.length-1);i++) {
 					newNames[i] = names[i];
@@ -103,7 +103,7 @@ class RandomPairs {
 				}
 			}
 			reader.close();
-			if(groups[groups.length-1][0]=="") {
+			if(groups[groups.length-1][0].equals("")) {
 				String[][] newGroups = new String[groups.length-1][];
 				for(int i = 0;i<(groups.length-1);i++) {
 					newGroups[i] = groups[i];
@@ -156,40 +156,42 @@ class RandomPairs {
 		boolean groupFound = false;
 		String[][] pairs = pair(names);
 		int panicCounter = 0;
-		while(!groupFound) {
+		boolean errorPairing = false;
+		while(groupFound == false) {
 			panicCounter++;
 			if(panicCounter>100) {
 				System.out.println("ERROR: Cannot Generate New Group List!");
+				errorPairing = true;
+				break;
 			}
 			groupFound = true;
 			pairs = pair(names);
 			for(int i = 0;i<pairs.length;i++) {
 				for(int x = 0;x<unallowedGroups.length;x++) {
-					System.out.println("Testing:");
-					System.out.println("A: "+unallowedGroups[x][0]+","+unallowedGroups[x][1]);
-					System.out.println("B: "+pairs[i][0]+","+pairs[i][1]);
-					if(unallowedGroups[x] == pairs[i]) {
-						groupFound = false;
-						break;
+					if(unallowedGroups[x][0].equals(pairs[i][0])) {
+						if(unallowedGroups[x][1].equals(pairs[i][1])) {
+							groupFound = false;
+						}
 					} else {
-						if(unallowedGroups[x][0] == pairs[i][1]) {
-							if(unallowedGroups[x][1] == pairs[i][0]) {
+						if(unallowedGroups[x][0].equals(pairs[i][1])) {
+							if(unallowedGroups[x][1].equals(pairs[i][0])) {
 								groupFound = false;
-								break;
 							}
 						}
 					}
 				}
 			}
 		}
-		System.out.println("Pairs:");
-		for(int i = 0;i < pairs.length; i++) {
-			if(pairs[i][1] != "") {
-				System.out.println(pairs[i][0]+" and "+pairs[i][1]);
-			} else {
-				System.out.println(pairs[i][0]+" does not have a pair and can join a group!");
+		if(!errorPairing) {
+			System.out.println("Pairs:");
+			for(int i = 0;i < pairs.length; i++) {
+				if(pairs[i][1] != "") {
+					System.out.println(pairs[i][0]+" and "+pairs[i][1]);
+				} else {
+					System.out.println(pairs[i][0]+" does not have a pair and can join a group!");
+				}
 			}
+			saveUnallowedGroups(unallowedGroups,pairs);
 		}
-		//saveUnallowedGroups(unallowedGroups,pairs);
 	}
 }
