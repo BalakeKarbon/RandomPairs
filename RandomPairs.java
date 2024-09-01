@@ -1,4 +1,6 @@
 import java.util.Random;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -43,7 +45,6 @@ class RandomPairs {
 		return pairs;
 	}
 	public static String[] loadNameList() {
-		//names.txt
 		String[] names = new String[]{""};
 		try {
 			FileInputStream inputStream = new FileInputStream("names.txt");
@@ -74,12 +75,66 @@ class RandomPairs {
 		}
 		return names;
 	}
-	/*public static String[][] loadUnallowedGroups() {
-		//oldGroups.txt
+	public static String[][] loadUnallowedGroups() {
+		String[][] groups = new String[1][];
+		groups[0] = new String[]{"",""};
+		try {
+			FileInputStream inputStream = new FileInputStream("oldGroups.txt");
+			InputStreamReader reader = new InputStreamReader(inputStream,"UTF-8");
+			int curChar;
+			boolean firstName = true;
+			while((curChar = reader.read()) != -1) {
+				if(curChar == '\n') {
+					firstName = true;
+					String[][] newGroups = new String[groups.length+1][];
+					for(int i = 0;i<groups.length;i++) {
+						newGroups[i]=groups[i];
+					}
+					newGroups[groups.length]=new String[]{"",""};
+					groups = newGroups;
+				} else if(curChar == ',') {
+					firstName = false;
+				} else {
+					if(firstName) {
+						groups[groups.length-1][0]=groups[groups.length-1][0]+(char)curChar;
+					} else {
+						groups[groups.length-1][1]=groups[groups.length-1][1]+(char)curChar;
+					}
+				}
+			}
+			reader.close();
+			if(groups[groups.length-1][0]=="") {
+				String[][] newGroups = new String[groups.length-1][];
+				for(int i = 0;i<(groups.length-1);i++) {
+					newGroups[i] = groups[i];
+				}
+				groups = newGroups;
+			}
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+		return groups;
 	}
-	public static boolean saveUnallowedGroups() {
-		//oldGroups.txt
-	}*/
+	public static void saveUnallowedGroups(String[][] oldGroups,String[][] newGroups) {
+		int totalLength = newGroups.length+oldGroups.length;
+		String[][] groups = new String[totalLength][];
+		for(int i = 0;i<oldGroups.length;i++) {
+			groups[i] = oldGroups[i];
+		}
+		for(int i = 0;i<newGroups.length;i++) {
+			groups[i+(oldGroups.length)] = newGroups[i];
+		}
+		try {
+			FileWriter saveFileWriter = new FileWriter("oldGroups.txt");
+			for(int i = 0;i<groups.length;i++) {
+				saveFileWriter.write(groups[i][0]+','+groups[i][1]+'\n');
+			}
+			saveFileWriter.close();
+			System.out.println("Saved new groups.");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	public static void main(String args[]) {
 		/*String[] names=new String[]{
 			"bob", 
@@ -93,23 +148,26 @@ class RandomPairs {
 			"kevin"
 		};*/
 
-		String[][] unallowedGroups = new String[][]{
+		/*String[][] unallowedGroups = new String[][]{
 			{"hannah","blake"}
-		};
+		};*/
 		String[] names = loadNameList();
-		//String[][] unallowedGroups = loadUnallowedGroups();
+		String[][] unallowedGroups = loadUnallowedGroups();
 		boolean groupFound = false;
 		String[][] pairs = pair(names);
 		int panicCounter = 0;
 		while(!groupFound) {
 			panicCounter++;
 			if(panicCounter>100) {
-				System.out.println("AAAAAAA");
+				System.out.println("ERROR: Cannot Generate New Group List!");
 			}
 			groupFound = true;
 			pairs = pair(names);
 			for(int i = 0;i<pairs.length;i++) {
 				for(int x = 0;x<unallowedGroups.length;x++) {
+					System.out.println("Testing:");
+					System.out.println("A: "+unallowedGroups[x][0]+","+unallowedGroups[x][1]);
+					System.out.println("B: "+pairs[i][0]+","+pairs[i][1]);
 					if(unallowedGroups[x] == pairs[i]) {
 						groupFound = false;
 						break;
@@ -132,5 +190,6 @@ class RandomPairs {
 				System.out.println(pairs[i][0]+" does not have a pair and can join a group!");
 			}
 		}
+		//saveUnallowedGroups(unallowedGroups,pairs);
 	}
 }
